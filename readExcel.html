@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
+</head>
+<style>
+.split {
+  height: 100%;
+  width: 50%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  padding-top: 10px;
+  overflow-x: hidden;
+ }
+.left {
+  left: 0;
+  border-style: groove;
+}
+.right {
+  right: 0;
+  border-style: groove;
+}
+.button {
+  padding: 15px 25px;
+   font-size: 24px;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  color: #fff;
+  background-color: #4CAF50;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 9px rgb(0, 0, 0);
+}
+.button:hover {background-color: #3e8e41}
+.button:active {
+  background-color: #318e41;
+  box-shadow: 0 5px rgb(12, 12, 12);
+  transform: translateY(4px);
+}
+ul {
+  list-style-type: none;
+  margin-top : 0;
+  padding: 0;
+  overflow: hidden;
+  background-color:rgb(57, 77, 192);
+}
+li {
+  float: left;
+  cursor: pointer;
+}
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+li a:hover {
+  background-color: rgb(165, 165, 236);
+  color: #283966;
+}
+input[type=text], select {
+  width: 80%;
+  padding: 12px 20px;
+  margin: 8px 8px;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+input[type=text]:focus {
+  background-color: rgb(237, 245, 165);
+}
+.myButton {
+	box-shadow: -7px 7px 0px 0px #9fb4f2;
+	background:linear-gradient(to bottom, #7892c2 5%, #0071fa 100%);
+	background-color:#7892c2;
+	border-radius:6px;
+	border:1px solid #4e6096;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 4px 0px #283966;
+}
+.myButton:hover {
+	background:linear-gradient(to bottom, #0071fa 5%, #7892c2 100%);
+	background-color:#0071fa;
+}
+.myButton:active {
+	position:relative;
+	top:1px;
+}
+.myButton1 {
+	box-shadow: 0px 10px 14px -7px #276873;
+	background:linear-gradient(to bottom, #599bb3 5%, #408c99 100%);
+	background-color:#599bb3;
+	border-radius:8px;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:20px;
+	font-weight:bold;
+	padding:13px 32px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #3d768a;
+}
+.myButton1:hover {
+	background:linear-gradient(to bottom, #408c99 5%, #599bb3 100%);
+	background-color:#408c99;
+}
+.myButton1:active {
+	position:relative;
+	top:1px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+tr:nth-child(even){background-color: #f2f2f2}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+<body onload="filldata()">
+    <div class="split left" style="background-color:  #00cbfd;" align="center">
+        <ul align="center">
+            <li id="ins"><a class="active" onclick="changeUI('insert')">INSERT ITEMS</a></li>
+            <li id="exc"><a onclick="changeUI('excel')">GET RECORD FROM EXCEL</a></li>
+          </ul>
+            <div id="exceldiv" style="display: none; padding-top: 10px;">
+                <input type="file" class="myButton1" id="input"><br><br>
+                <button id="button" class="myButton" >CONVERT DATA</button><br><br>
+                <table id="myTable" >
+                    <tr>
+                        <th>SR NO.</th>
+                        <th>PRODUCT NAME</th>
+                        <th>PRICE</th>
+                        <th>CATEGORY</th>
+                        <th>STOCK</th>
+                        
+                    </tr>
+                </table>
+            </div>
+            <div id="insertdiv" style="padding-top: 10px;">
+                <input type="text" placeholder="ENTER PRODUCT NAME" id="pnm"/><br><br>
+                <input type="text" placeholder="ENTER CATEGORY" id="pct"/><br><br>
+                <input type="text" placeholder="ENTER PRICE" id="ppr"/><br><br>
+                <input type="text" placeholder="ENTER STOCK" id="pst"/><br><br>
+                <button class="button" class="myButton" onclick="insertData()">SAVE</button><br><br>
+            </div>
+    </div>
+    <div class="split right" onload="filldata()" style="background-color:  #00cbfd;" align="center">
+        <div id="clouddata">
+            <table id="cloTable" style="width: 90%;">
+                <tr>
+                    <th>SR NO.</th>
+                    <th>PRODUCT NAME</th>
+                    <th>PRICE</th>
+                    <th>CATEGORY</th>
+                    <th>STOCK</th>
+                    <th>EDIT</th>
+                </tr>
+            </table>
+        </div>
+        
+        <div id="newdiv" style="display: none;">
+            <h1 id="nonew" style="display: none;">NO NEW REOCRD AS BEEN FOUND !!!</h1>
+            <div id="newtablediv" style="display: none;">
+                <h1 >NEW REOCRD AS BEEN FOUND !!!</h1>
+                <table id="newTable" >
+                    <tr>
+                        <th>SR NO.</th>
+                        <th>PRODUCT NAME</th>
+                        <th>PRICE</th>
+                        <th>CATEGORY</th>
+                        <th>STOCK</th>
+                    </tr>
+                </table><br><br>
+                <button class="button" onclick="savenew()">SAVE NEW ITEM</button>
+            </div>
+        </div>
+    </div>
+</body>  
+<script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-firestore.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>  
+<script src = "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>  
+<script>
+    
+    function changeUI(val)
+    {
+        if(val=="excel")
+        {
+            document.getElementById("exc").style.backgroundColor = "rgb(1, 3, 36)"
+            document.getElementById("ins").style.backgroundColor = "rgb(57, 77, 192)"
+            document.getElementById("insertdiv").style.display = "none";
+            document.getElementById("exceldiv").style.display = "block";
+            document.getElementById("clouddata").style.display = "none"
+        }
+        if(val=="insert")
+        {
+            document.getElementById("ins").style.backgroundColor = "rgb(1, 3, 36)"
+            document.getElementById("exc").style.backgroundColor = "rgb(57, 77, 192)"
+            document.getElementById("exceldiv").style.display = "none";
+            document.getElementById("insertdiv").style.display = "block";
+            document.getElementById("clouddata").style.display = "block"
+        }
+    }
+    var firebaseConfig = {
+                apiKey: "AIzaSyB0dQQwE-e6w-ZmtdKq0yC3FRCh7QQLmLg",
+                authDomain: "fir-project1-61ac6.firebaseapp.com",
+                databaseURL: "https://fir-project1-61ac6.firebaseio.com",
+                projectId: "fir-project1-61ac6",
+                storageBucket: "fir-project1-61ac6.appspot.com",
+                messagingSenderId: "467990558487",
+                appId: "1:467990558487:web:59bcf9cc06930b0ff02952",
+                measurementId: "G-ZHQ0GFK6HM"
+            };
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+    var db = firebase.firestore();
+    let selectedFile;
+    var inm;
+    var ipr;
+    var ict;
+    var ist;
+    var ninm;
+    var nipr;
+    var nict;
+    var nist;
+    function filldata()
+    {
+        db.collection("items").get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                var thisData = JSON.stringify(doc.data());
+                thisData = thisData.replace("{","");
+                thisData = thisData.replace("}","");
+                var arr = thisData.split(",");
+                var jnm;
+                var jpr;
+                var jct;
+                var jst;
+                var k=1;
+                var table = document.getElementById("cloTable");
+                var row = table.insertRow(table.rows.count);
+                var cell0 = row.insertCell(0);
+                var cell1 = row.insertCell(1);
+                var cell2 = row.insertCell(2);
+                var cell3 = row.insertCell(3);
+                var cell4 = row.insertCell(4);
+                var cell5 = row.insertCell(5);
+                arr.forEach(ele => {
+                    var rec = ele.split(":");
+                    var colnm = rec[0];
+                    var dta = rec[1];
+                    dta = dta.replace('"','')
+                    dta = dta.replace('"','')
+                    if(colnm=='"prnm"')
+                    {
+                        jnm = dta;
+                    }
+                    if(colnm=='"prpr"')
+                    {
+                        jpr = dta;
+                    }
+                    if(colnm=='"prctg"')
+                    {
+                        jct= dta;
+                    }
+                    if(colnm=='"prstk"')
+                    {
+                        jst = dta;
+                    }
+                    cell0.innerHTML = table.rows.length-1;
+                    cell1.innerHTML = jnm;
+                    cell2.innerHTML = jpr;
+                    cell3.innerHTML = jct;
+                    cell4.innerHTML = jst;
+                    cell5.innerHTML = '<button onclick="deleteRec(this)">DELETE</button>'
+                    k++;
+                });
+            });
+        });    
+    }
+    function deleteRec(oButton)
+    {
+        if(confirm("ARE SURE YOU WANT TO DELETE !!!"))
+        {
+            var tb = document.getElementById("cloTable");
+            index = oButton.parentNode.parentNode.rowIndex;
+            var rnm = tb.rows[index].cells[1].innerHTML;
+            var rct = tb.rows[index].cells[3].innerHTML;
+            docnm = (rnm.replace(" ","")).replace("-","")+rct;
+            docnm = docnm.replace(/(\r\n\s|\n|\r|\s)/gm,'');
+            tb.deleteRow(oButton.parentNode.parentNode.rowIndex);
+            db.doc("items/"+docnm).delete()
+            .then(function (doc) {
+                location.reload()
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+    }
+    function insertData()
+    {
+        
+        var pnm = document.getElementById("pnm").value;
+        var pct= document.getElementById("pct").value;
+        var ppr = document.getElementById("ppr").value;
+        var pst = document.getElementById("pst").value;
+        docnm = (pnm.replace(" ","")).replace("-","")+pct;
+        docnm = docnm.replace(/(\r\n\s|\n|\r|\s)/gm,'');
+        alert(docnm);
+        db.collection("items").doc(docnm).set({
+                prnm: pnm,
+                prpr: ppr,
+                prctg: pct,
+                prstk: pst
+            })
+            .then(function (response) {
+                alert("docid : "+response.id);  
+                location.reload()              
+            })
+            .catch(function (error) {
+                console.log("Error adding document: ",error);
+        });
+       
+    }
+    document.getElementById('input').addEventListener("change", (event) => {
+        selectedFile = event.target.files[0];
+    })
+    document.getElementById('button').addEventListener("click", () => {
+        
+        if(selectedFile)
+        {
+            let fileReader = new FileReader();
+            fileReader.readAsBinaryString(selectedFile);
+            fileReader.onload = (event)=>
+            {
+                let data = event.target.result;
+                let workbook = XLSX.read(data,{type:"binary"});
+                console.log(workbook);
+                workbook.SheetNames.forEach(sheet => {
+                    let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet]);
+                    records = JSON.stringify(rowObject);
+                    records = records.replace("[]","");
+                    records = records.replace("[","");
+                    records = records.replace("]","");
+                    records = records.trim();
+                    rowdata = _.compact(records.split(","));
+                    var i = 1;
+                    rowdata.forEach(ele => 
+                    {
+                        if((typeof ele !== 'undefined') && (typeof ele !== 'null')) 
+                        {
+                           
+                            var rec = ele.split(":");
+                            var colnm = rec[0];
+                            var dta = rec[1];
+                            colnm = colnm.replace('"','');
+                            colnm = colnm.replace('"','');
+                            colnm = colnm.replace('{','');
+                            colnm = colnm.replace('}','');
+                            dta = dta.replace('"','');
+                            dta = dta.replace('"','');
+                            dta = dta.replace('{','');
+                            dta = dta.replace('}','');
+                            colnm = (colnm.trim());
+                            dta = (dta.trim());
+                            if(colnm=="Product name"){
+                                inm = inm + dta + ",";
+                            }
+                            if(colnm=="Price"){
+                                ipr = ipr + dta + "," ;
+                            }
+                            if(colnm=="Category"){
+                                ict = ict + dta + ",";
+                            }
+                            if(colnm=="Stock"){
+                                ist = ist + dta + ",";
+                                i++; 
+                            }
+                            
+                        }           
+                    });
+                });
+                checkRecord(inm,ipr,ict,ist);
+            }
+        }
+    });
+    function checkRecord(inm,ipr,ict,ist)
+    {
+        inm = inm.replace("undefined","");
+        ipr = ipr.replace("undefined","");
+        ict = ict.replace("undefined","");
+        ist = ist.replace("undefined","");
+
+        inm = inm.substring(0,(inm.length)-1);
+        ipr = ipr.substring(0,(ipr.length)-1);
+        ict = ict.substring(0,(ict.length)-1);
+        ist = ist.substring(0,(ist.length)-1);
+
+        inm = inm.split(",");
+        ipr = ipr.split(",");
+        ict = ict.split(",");
+        ist = ist.split(",");
+        for(k=0;k<inm.length;k++)
+        {
+
+            var table = document.getElementById("myTable");
+            var row = table.insertRow(table.rows.count);
+            var cell0 = row.insertCell(0);
+            var cell1 = row.insertCell(1);
+            var cell2 = row.insertCell(2);
+            var cell3 = row.insertCell(3);
+            var cell4 = row.insertCell(4);
+
+            cell0.innerHTML = k+1;
+            cell1.innerHTML = inm[k];
+            cell2.innerHTML = ipr[k];
+            cell3.innerHTML = ict[k];
+            cell4.innerHTML = ist[k];
+            checkdata(k,inm[k],ipr[k],ict[k],ist[k]);
+
+         }
+        var oTable = document.getElementById('newTable');
+        var rowLength = oTable.rows.length;
+        if(rowLength==1)
+        {
+            document.getElementById("nonew").style.display = "block";
+            document.getElementById("newdiv").style.display = "block"
+            document.getElementById("newtablediv").style.display = "none";
+        }
+    }
+    function checkdata(k,pnm,ppr,pct,pst) 
+    {
+        docnmame = (pnm.replace(" ","")).replace("-","")+pct;
+        docnmame = docnmame.replace(/(\r\n\s|\n|\r|\s)/gm,'');
+        var docRef = db.collection("items").doc(docnmame);
+        
+        docRef.get().then(function(doc) {
+            if (!doc.exists) 
+            {
+                document.getElementById("newdiv").style.display = "block"
+                document.getElementById("nonew").style.display = "none";
+                document.getElementById("newtablediv").style.display = "block";
+                var table = document.getElementById("newTable");
+                var row = table.insertRow(table.rows.count);
+                var cell0 = row.insertCell(0);
+                var cell1 = row.insertCell(1);
+                var cell2 = row.insertCell(2);
+                var cell3 = row.insertCell(3);
+                var cell4 = row.insertCell(4);
+
+                cell0.innerHTML = k+1;
+                cell1.innerHTML = pnm;
+                cell2.innerHTML = ppr;
+                cell3.innerHTML = pct;
+                cell4.innerHTML = pst;
+
+                ninm = ninm+pnm+",";
+                nipr = nipr+ppr+",";
+                nict = nict+pct+",";
+                nist = nist+pst+",";
+            }
+        }).catch(function(error) {
+            console.log("Error getting document:", error);
+        });
+       
+    }
+    function savenew()
+    {
+        
+        var oTable = document.getElementById('newTable');
+        var rowLength = oTable.rows.length;
+        
+        if(confirm(rowLength-1+" NEW RECORDS FONUD"))
+        {
+            for (i = 1; i < rowLength; i++)
+            {
+                var cellVal=[];
+                var oCells = oTable.rows.item(i).cells;
+                var cellLength = oCells.length;
+                for(var j = 0; j < cellLength; j++)
+                {
+                    cellVal[j] = oCells.item(j).innerHTML;
+                }
+                docnmame = (cellVal[1].replace(" ","")).replace("-","")+cellVal[3];
+                docnmame = docnmame.replace(/(\r\n\s|\n|\r|\s)/gm,'');
+                db.collection("items").doc(docnmame).set({
+                    prnm:cellVal[1],
+                    prpr:cellVal[2],
+                    prctg:cellVal[3],
+                    prstk:cellVal[4],
+                })
+                .then(function() {
+                    alert("ADDED ITEM : "+cellVal[1]);
+                    window.location.href="readExcel.html"
+                })
+                .catch(function(error) {
+                    console.error("Error writing document: ", error);
+                });
+            }
+
+        }
+            
+    }
+</script>
+</html>
